@@ -1,0 +1,19 @@
+---
+- name: Deploy a nested ESXi environment by installing the ISO via a KS.CFG file
+  hosts: all
+  gather_facts: false
+
+  vars_files:
+    - creds.yaml
+
+  tasks:
+
+    - name: Create and Configure Nested esxis
+      include_tasks: deployesxi.yml
+      with_items: "{{ nested_info }}"
+#      vars:
+#        - nested_creds_info: "{{ nested_creds }}"
+      loop_control:
+        loop_var: nested_info
+
+

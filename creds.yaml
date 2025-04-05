@@ -1,0 +1,29 @@
+nested_info:
+  - name: esxi-6
+    idracip: 192.168.3.100
+    staticip: 192.168.3.16
+    fqdn: esxi-1.home.lab
+
+  - name: esxi-7
+    idracip: 192.168.3.101
+    staticip: 192.168.3.17
+    fqdn: esxi-2.home.lab
+
+  - name: esxi-8
+    idracip: 192.168.3.101
+    staticip: 192.168.3.18
+    fqdn: esxi-3.home.lab
+
+  - name: esxi-9
+    idracip: 192.168.3.100
+    staticip: 192.168.3.19
+    fqdn: esxi-4.home.lab
+
+nested_info_global:
+  username: root
+  password: "Admin@123"
+  dns: 192.168.3.6
+  gateway: 192.168.3.1
+  staticmask: 255.255.255.0
+  ntpserver: pool.ntp.org
+  iso_location: "/root/VMware-VMvisor-Installer-7.0.0.update03-19193900.x86_64-DellEMC_Customized-A03.iso"

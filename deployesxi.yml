@@ -1,0 +1,45 @@
+- block:
+    - name: Create temp directory for iso extraction
+      ansible.builtin.file:
+        path: "/tmp/isoextract/KS"
+        state: directory
+        mode: "755"
+    
+    - name: Create temp directory for the finished isos
+      ansible.builtin.file:
+        path: "/tmp/isofinished"
+        state: directory
+        mode: "755"
+    
+    - name: Extract ESXi ISO
+      ansible.builtin.command: "xorriso -osirrox on -indev {{ nested_info_global.iso_location }} -extract / /tmp/isoextract"
+      changed_when: false
+    
+    - name: Add write permission to extracted files
+      ansible.builtin.file:
+        path: "/tmp/isoextract"
+        state: directory
+        recurse: true
+        mode: u+w
+    
+    - name: Edit BOOT.CFG to inject the KS.CFG file
+      ansible.builtin.replace:
+        dest: "{{ item }}"
+        regexp: 'kernelopt=.*'
+        replace: 'kernelopt=runweasel ks=cdrom:/KS/KS.CFG'
+      loop:
+        - "/tmp/isoextract/BOOT.CFG"
+        - "/tmp/isoextract/EFI/BOOT/BOOT.CFG"
+    
+    - name: Create kickstart file for each nested ESXi host
+      ansible.builtin.template:
+        src: "ks.j2"
+        dest: "/tmp/isoextract/KS/KS.CFG"
+        mode: "666"
+    
+    - name: Create custom ESXi ISO for each nested ESXi host
+      ansible.builtin.command: "xorrisofs -relaxed-filenames -J -R -o /tmp/isofinished/{{ nested_info.name }}.iso \
+                              -b ISOLINUX.BIN -c BOOT.CAT -no-emul-boot -boot-load-size 4 -boot-info-table -eltorito-alt-boot -e EFIBOOT.IMG -no-emul-boot /tmp/isoextract/"
+      args:
+        chdir: "/tmp/isoextract/"
+

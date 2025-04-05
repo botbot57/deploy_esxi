@@ -1,0 +1,45 @@
+# Accept the VMware End User License Agreement
+vmaccepteula
+
+# Set the root password
+rootpw "{{ nested_info_global.password }}"
+
+# Install ESXi to the local disk
+install --firstdisk --overwritevmfs
+
+# Host Network Settings
+# network --bootproto=dhcp --device=vmnic0
+network --bootproto=static --addvmportgroup=0 --ip={{ nested_info.staticip }} --netmask={{ nested_info_global.staticmask }} --gateway={{ nested_info_global.gateway }} --nameserver={{ nested_info_global.dns }} --hostname={{ nested_info.fqdn }}
+
+# Reboot ESXi host
+reboot
+
+# Open busybox and launch commands
+%firstboot --interpreter=busybox
+
+# Enable & start remote ESXi Shell (SSH)
+vim-cmd hostsvc/enable_ssh
+vim-cmd hostsvc/start_ssh
+
+# Enable & start ESXi Shell (TSM)
+vim-cmd hostsvc/enable_esx_shell
+vim-cmd hostsvc/start_esx_shell
+
+# Supress ESXi Shell warning
+esxcli system settings advanced set -o /UserVars/SuppressShellWarning -i 1
+
+# Disable CEIP
+esxcli system settings advanced set -o /UserVars/HostClientCEIPOptIn -i 2
+
+# Configure DNS servers
+esxcli network ip dns server add --server={{ nested_info_global.dns }}
+
+# Regenerate the certificate
+/sbin/generate-certificates
+
+#Configure NTP
+esxcli system ntp set -s={{ nested_info_global.ntpserver }}
+esxcli system ntp set -e=yes
+
+# Reboot ESXi host
+reboot
