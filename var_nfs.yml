@@ -1,0 +1,3 @@
+path: /tmp/isofinished
+clients: "10.2.220.0/24(rw,sync,no_subtree_check,no_root_squash)"
+

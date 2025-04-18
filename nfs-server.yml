@@ -1,0 +1,35 @@
+---
+- name: Install NFS Server
+  hosts: all
+  become: yes
+
+  vars_files:
+    - var_nfs.yml
+  tasks:
+    - name: Install NFS server packages
+      ansible.builtin.package:
+        name: nfs-utils
+        state: present
+
+#    - name: Create shared directories
+#      ansible.builtin.file:
+#        path: "{{ item.path }}"
+#        state: directory
+#        mode: '0777'
+#      loop: "{{ nfs_exports }}"
+
+    - name: Thêm dòng vào /etc/exports
+      ansible.builtin.lineinfile:
+        path: /etc/exports
+        line: '{{ path }} {{ clients }}'
+        create: yes
+
+    - name: Enable and start NFS server service
+      ansible.builtin.service:
+        name: nfs-server
+        enabled: yes
+        state: started
+
+    - name: Reload NFS exports
+      ansible.builtin.command: exportfs -ra
+
